@@ -1,0 +1,22 @@
+{
+  "name": "guess-the-year",
+  "version": "1.0.0",
+  "description": "Back end service for Guess the Year Alexa Skill",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mlewis7127/guess-the-year.git"
+  },
+  "author": "Matthew Lewis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mlewis7127/guess-the-year/issues"
+  },
+  "homepage": "https://github.com/mlewis7127/guess-the-year#readme",
+  "dependencies": {
+    "ask-sdk": "^2.7.0"
+  }
+}
