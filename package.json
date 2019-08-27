@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/mlewis7127/guess-the-year#readme",
   "dependencies": {
-    "ask-sdk": "^2.7.0"
+    "ask-sdk": "^2.7.0",
+    "aws-sdk": "^2.518.0",
+    "https": "^1.0.0"
   },
   "devDependencies": {
     "eslint": "^6.2.1",

@@ -30,4 +30,4 @@ const constants = Object.freeze({
 
 });
 
-export default constants;
+module.exports = constants;

@@ -1,0 +1,33 @@
+service: guess-the-year-alexa
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  memorySize: 512
+  timeout: 10
+  logRetentionInDays: 7 # Set the default RetentionInDays for a CloudWatch LogGroup
+  stage: ${opt:stage, 'dev'}
+  region: eu-west-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action: # Give permission to create and access DynamoDB
+        - dynamodb:DescribeTable
+        - dynamodb:CreateTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:eu-west-1:*:*"
+
+functions:
+  handleLambda:
+    handler: functions/index.handler
+    name: ${self:provider.stage}-guess-the-year-alexa
+    environment:
+      TABLE_NAME: 'Test-Guess-The-Year'
+    events:
+      - alexaSkill:
+          appId: ${ssm:/alexa/guess-the-year/appId}
+          enabled: true

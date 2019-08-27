@@ -1,75 +1,112 @@
 /* eslint-disable  no-console */
 /* eslint-disable  no-unused-vars */
+/* eslint-disable no-param-reassign */
 /* eslint no-plusplus: ["error", { "allowForLoopAfterthoughts": true }] */
 
 
 // 1. Include required modules
 const Alexa = require('ask-sdk');
-const data = require('./data/data').default;
 const constants = require('./constants/constants');
+const GetQuestion = require('./data/get-question');
 
 
-// 2. Define Helper Functions and Constants
+// 2. Define Constants
 
 const MAX_QUESTION_COUNT = 5;
 const YEAR_DIFFERENCE_MIN = -3;
 const YEAR_DIFFERENCE_MAX = 3;
 
-function askQuestion(handlerInput) {
+const ID_ARRAY = [];
+const QUESTION_COUNT = 100;
+
+// 2. Define Helper Functions
+
+// A helper function to shuffle the order of questions in an array
+function shuffle(array) {
+  let currentIndex = array.length; let temporaryValue; let
+    randomIndex;
+
+  // While there remain elements to shuffle...
+  while (currentIndex !== 0) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+  return array;
+}
+
+async function askQuestion(handlerInput) {
+  console.log('In askQuestion function');
   // Need to get the question array from the sessiom
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-  let { questionArray } = sessionAttributes;
-  let id;
-  let question;
+  let questionArray = sessionAttributes.questionArray;
+  let index;
   let answer;
+  let question;
 
-  if (typeof questionArray === 'undefined' || questionArray.length === 0) {
-    // the array has not been initialised or is empty
-    questionArray = [];
-    for (let i = 0; i < data.DATA.length; i++) {
-      questionArray.push(parseInt(i, 10));
+  console.log(typeof questionArray);
+
+  // If the questionArray is not defined, then instantiate a new array and shuffle Id's
+  if (typeof questionArray === 'undefined') {
+    console.log('In askQuestion function - questionArray is undefined');
+    const tempArray = [];
+    for (let i = 0; i < QUESTION_COUNT; i++) {
+      tempArray[i] = i;
     }
+    questionArray = shuffle(tempArray);
+    index = 0;
     sessionAttributes.questionArray = questionArray;
+  } else {
+    index = sessionAttributes.index + 1;
+    answer = sessionAttributes.currentAnswer;
+    question = sessionAttributes.currentQuestion;
+    // if max index number is reached, then reset back to zero
+    if (index === QUESTION_COUNT) {
+      index = 0;
+    }
   }
 
-  // Now select a random value from the questionArray
-  const yearArrayIndex = Math.floor(Math.random() * questionArray.length);
-  const yearData = questionArray[yearArrayIndex];
-  const response = data.DATA.find((o) => o.Id === yearData);
+  // Now get the next question from DynamoDB
+  let QuestionData;
 
-  if (response) {
-    id = response.Id;
-    question = response.Question;
-    answer = response.Answer;
-    sessionAttributes.currentQuestion = question;
-    sessionAttributes.currentAnswer = answer;
+  try {
+    QuestionData = await GetQuestion.getNextQuestion(index);
+    answer = QuestionData.Item.Answer;
+    question = QuestionData.Item.Question;
+  } catch (error) {
+    console.log(`Error calling GetQuestion${error}`);
   }
 
-  // Now to look to remove the selected record
-  const deleteArrayIndex = questionArray.indexOf(parseInt(id, 10));
-  if (deleteArrayIndex > -1) {
-    questionArray.splice(deleteArrayIndex, 1);
-  }
+  console.log(`Retrieved following from DynamoDB: ${JSON.stringify(QuestionData)}`);
 
-  sessionAttributes.questionArray = questionArray;
+  sessionAttributes.index = index;
+  sessionAttributes.currentQuestion = question;
+  sessionAttributes.currentAnswer = answer;
   sessionAttributes.count += 1;
 
   if (sessionAttributes.RESPONSE) {
-    const RESPONSE_MSG = `${sessionAttributes.RESPONSE}Question ${sessionAttributes.count}: ${constants.START_QUESTION}${question}`;
+    const RESPONSE_MSG = `${sessionAttributes.RESPONSE} Question ${sessionAttributes.count}: ${constants.START_QUESTION}${question}`;
     return handlerInput.responseBuilder
       .speak(RESPONSE_MSG)
       .reprompt(RESPONSE_MSG)
       .getResponse();
+  } else {
+    const RESPONSE_MSG = `Question ${sessionAttributes.count}: ${constants.START_QUESTION}${question}`;
+    return handlerInput.responseBuilder
+      .speak(RESPONSE_MSG)
+      .reprompt(RESPONSE_MSG)
+      .getResponse();  
   }
-  const RESPONSE_MSG = `Question ${sessionAttributes.count}: ${constants.START_QUESTION}${question}`;
-  return handlerInput.responseBuilder
-    .speak(RESPONSE_MSG)
-    .reprompt(RESPONSE_MSG)
-    .getResponse();
 }
 
 function finalScore(handlerInput) {
+  console.log('In finalScore function');
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
   let FINAL_SCORE = null;
   if (sessionAttributes.score === 1) {
@@ -84,6 +121,7 @@ function finalScore(handlerInput) {
 }
 
 function tryAgain(handlerInput) {
+  console.log('In tryAgain function');
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
   const RESPONSE_MSG = sessionAttributes.RESPONSE + constants.START_QUESTION
      + sessionAttributes.currentQuestion;
@@ -94,6 +132,7 @@ function tryAgain(handlerInput) {
 }
 
 function setUpQuiz(handlerInput) {
+  console.log('In setUpQuiz function');
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
   sessionAttributes.RESPONSE = null;
   sessionAttributes.currentQuestion = null;
@@ -111,6 +150,7 @@ const LaunchRequestHandler = {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
+    console.log('In LaunchRequestHander function');
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     sessionAttributes.RESPONSE = null;
@@ -141,6 +181,7 @@ const YesIntentHandler = {
         && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.YesIntent';
   },
   handle(handlerInput) {
+    console.log('In YesIntentHandler function');
     return askQuestion(handlerInput);
   },
 };
@@ -151,6 +192,7 @@ const NoIntentHandler = {
         && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.NoIntent';
   },
   handle(handlerInput) {
+    console.log('In NoIntentHandler function');
     return handlerInput.responseBuilder
       .speak(constants.GOODBYE_MSG)
       .withShouldEndSession(true)
@@ -164,6 +206,7 @@ const AnswerIntentHandler = {
         && handlerInput.requestEnvelope.request.intent.name === 'AnswerIntent';
   },
   handle(handlerInput) {
+    console.log('In AnswerIntentHandler function');
     const { request } = handlerInput.requestEnvelope;
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
@@ -240,6 +283,7 @@ const DontKnowIntentHandler = {
         && handlerInput.requestEnvelope.request.intent.name === 'DontKnowIntent';
   },
   handle(handlerInput) {
+    console.log('In DontKnowIntentHandler function');
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     if (sessionAttributes.currentAnswer) {
@@ -270,6 +314,7 @@ const RepeatIntentHandler = {
         && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.RepeatIntent';
   },
   handle(handlerInput) {
+    console.log('In RepeatIntentHander function');
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     const RESPONSE_MSG = constants.START_QUESTION + sessionAttributes.currentQuestion;
@@ -287,6 +332,7 @@ const StartOverIntentHandler = {
         && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.StartOverIntent';
   },
   handle(handlerInput) {
+    console.log('In StartOverIntentHandler function');
     return setUpQuiz(handlerInput);
   },
 };
@@ -298,6 +344,7 @@ const HelpIntentHandler = {
         && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
+    console.log('In HelpIntentHandler function');
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     sessionAttributes.RESPONSE = null;
@@ -322,6 +369,7 @@ const CancelAndStopIntentHandler = {
           || handlerInput.requestEnvelope.request.intent.name === 'AMAZON.StopIntent');
   },
   handle(handlerInput) {
+    console.log('In CancelAndStopIntentHandler function');
     return handlerInput.responseBuilder
       .speak(constants.GOODBYE_MSG)
       .getResponse();
@@ -366,6 +414,7 @@ const ErrorHandler = {
     return true;
   },
   handle(handlerInput, error) {
+    console.log('In ErrorHandler function');
     console.log(`Error handled: ${error}`);
 
     return handlerInput.responseBuilder
