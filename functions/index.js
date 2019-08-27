@@ -50,8 +50,6 @@ async function askQuestion(handlerInput) {
   let answer;
   let question;
 
-  console.log(typeof questionArray);
-
   // If the questionArray is not defined, then instantiate a new array and shuffle Id's
   if (typeof questionArray === 'undefined') {
     console.log('In askQuestion function - questionArray is undefined');
@@ -64,19 +62,17 @@ async function askQuestion(handlerInput) {
     sessionAttributes.questionArray = questionArray;
   } else {
     index = sessionAttributes.index + 1;
-    answer = sessionAttributes.currentAnswer;
-    question = sessionAttributes.currentQuestion;
     // if max index number is reached, then reset back to zero
     if (index === QUESTION_COUNT) {
       index = 0;
     }
   }
 
-  // Now get the next question from DynamoDB
-  let QuestionData;
+  const id = questionArray[index];
+  console.log('In askQuestion function - the id from the array is ' + id);
 
   try {
-    QuestionData = await GetQuestion.getNextQuestion(index);
+    QuestionData = await GetQuestion.getNextQuestion(id);
     answer = QuestionData.Item.Answer;
     question = QuestionData.Item.Question;
   } catch (error) {
