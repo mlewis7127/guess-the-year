@@ -1,4 +1,5 @@
 /* eslint-disable  no-console */
+/* eslint-disable  camelcase */
 /* eslint-disable  no-unused-vars */
 /* eslint-disable no-param-reassign */
 /* eslint no-plusplus: ["error", { "allowForLoopAfterthoughts": true }] */
@@ -17,7 +18,7 @@ const YEAR_DIFFERENCE_MIN = -3;
 const YEAR_DIFFERENCE_MAX = 3;
 
 const ID_ARRAY = [];
-const QUESTION_COUNT = 100;
+const { number_of_questions } = process.env;
 
 // 2. Define Helper Functions
 
@@ -50,21 +51,30 @@ async function askQuestion(handlerInput) {
   let answer;
   let question;
 
-  // If the questionArray is not defined, then instantiate a new array and shuffle Id's
+  // If the questionArray is not defined, then instantiate a new array
+  // Shuffle the new array, and set the number of questions
   if (typeof questionArray === 'undefined') {
     console.log('In askQuestion function - questionArray is undefined');
     const tempArray = [];
-    for (let i = 0; i < QUESTION_COUNT; i++) {
+    for (let i = 0; i < number_of_questions; i++) {
       tempArray[i] = i;
     }
     questionArray = shuffle(tempArray);
     index = 0;
     sessionAttributes.questionArray = questionArray;
+    sessionAttributes.currentMaxQuestions = number_of_questions;
   } else {
     index = sessionAttributes.index + 1;
     // if max index number is reached, then reset back to zero
-    if (index === QUESTION_COUNT) {
+    if (index === Number(sessionAttributes.currentMaxQuestions)) {
+      const tempArray = [];
+      for (let i = 0; i < number_of_questions; i++) {
+        tempArray[i] = i;
+      }
+      questionArray = shuffle(tempArray);
       index = 0;
+      sessionAttributes.questionArray = questionArray;
+      sessionAttributes.currentMaxQuestions = number_of_questions;
     }
   }
 

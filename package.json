@@ -4,7 +4,7 @@
   "description": "Back end service for Guess the Year Alexa Skill",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint . --fix"
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
