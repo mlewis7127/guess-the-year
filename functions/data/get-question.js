@@ -22,12 +22,12 @@ const dynamodb = new DynamoDB.DocumentClient({
   }),
 });
 
-const { skill_table_name } = process.env;
+const { question_table_name } = process.env;
 
 const getNextQuestion = async (id) => {
   console.log(`In getNextQuestion function with ID: ${id}`);
   const resp = await dynamodb.get({
-    TableName: skill_table_name,
+    TableName: question_table_name,
     Key: { Id: id },
   }).promise();
 
