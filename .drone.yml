@@ -19,3 +19,12 @@ pipeline:
       - serverless deploy --stage dev
     when:
       event: tag
+
+deploy to production:
+    image: jch254/docker-node-serverless
+    commands:
+      - serverless deploy --stage prod
+    when:
+      event: deployment
+      environment: production
+
