@@ -24,7 +24,7 @@ provider:
 functions:
   handleLambda:
     handler: functions/index.handler
-    name: ${self:provider.stage}-guess-the-year-alexa
+    name: guess-the-year-alexa-${self:provider.stage}
     environment:
       skill_table_name: guess-the-year-alexa-${self:provider.stage}
       question_table_name: guess-the-year-questions-${self:provider.stage}
