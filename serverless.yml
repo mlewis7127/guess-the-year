@@ -28,7 +28,7 @@ functions:
     environment:
       skill_table_name: guess-the-year-alexa-${self:provider.stage}
       question_table_name: guess-the-year-questions-${self:provider.stage}
-      number_of_questions: 107
+      number_of_questions: 120
     events:
       - alexaSkill:
           appId: ${ssm:/alexa/guess-the-year/appId}

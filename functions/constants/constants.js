@@ -1,4 +1,4 @@
-const WELCOME_MESSAGE = 'Welcome to Guess the Year. I ask you a question about a famous event, and you tell me the 4 digit year '
+const WELCOME_MESSAGE = 'Welcome to the updated Guess the Year. I ask you a question about a famous event, and you tell me the 4 digit year '
     + 'in which it took place. Each game has 5 questions. Can you get all 5 right? Are you ready to play?';
 
 const WELCOME_BACK_MESSAGE = 'Welcome back to Guess the Year. Are you ready to play?';
