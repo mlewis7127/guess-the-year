@@ -436,6 +436,6 @@ exports.handler = skillBuilder
   .addRequestInterceptors(GuessYearRequestInterceptor)
   .addResponseInterceptors(PersistenceSavingResponseInterceptor)
   .addErrorHandlers(ErrorHandler)
-  .withTableName('Guess-The-Year-Test')
+  .withTableName(process.env.skill_table_name)
   .withAutoCreateTable(true)
   .lambda();

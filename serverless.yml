@@ -26,7 +26,8 @@ functions:
     handler: functions/index.handler
     name: ${self:provider.stage}-guess-the-year-alexa
     environment:
-      TABLE_NAME: 'Test-Guess-The-Year'
+      skill_table_name: guess-the-year-alexa-${self:provider.stage}
+      question_table_name: guess-the-year-questions-${self:provider.stage}
     events:
       - alexaSkill:
           appId: ${ssm:/alexa/guess-the-year/appId}
