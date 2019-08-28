@@ -45,7 +45,7 @@ async function askQuestion(handlerInput) {
   // Need to get the question array from the sessiom
   const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-  let questionArray = sessionAttributes.questionArray;
+  let { questionArray } = sessionAttributes;
   let index;
   let answer;
   let question;
@@ -69,17 +69,16 @@ async function askQuestion(handlerInput) {
   }
 
   const id = questionArray[index];
-  console.log('In askQuestion function - the id from the array is ' + id);
+  console.log(`In askQuestion function - the id from the array is ${id}`);
 
   try {
-    QuestionData = await GetQuestion.getNextQuestion(id);
+    const QuestionData = await GetQuestion.getNextQuestion(id);
     answer = QuestionData.Item.Answer;
     question = QuestionData.Item.Question;
+    console.log(`Retrieved following from DynamoDB: ${JSON.stringify(QuestionData)}`);
   } catch (error) {
     console.log(`Error calling GetQuestion${error}`);
   }
-
-  console.log(`Retrieved following from DynamoDB: ${JSON.stringify(QuestionData)}`);
 
   sessionAttributes.index = index;
   sessionAttributes.currentQuestion = question;
@@ -92,13 +91,12 @@ async function askQuestion(handlerInput) {
       .speak(RESPONSE_MSG)
       .reprompt(RESPONSE_MSG)
       .getResponse();
-  } else {
-    const RESPONSE_MSG = `Question ${sessionAttributes.count}: ${constants.START_QUESTION}${question}`;
-    return handlerInput.responseBuilder
-      .speak(RESPONSE_MSG)
-      .reprompt(RESPONSE_MSG)
-      .getResponse();  
   }
+  const RESPONSE_MSG = `Question ${sessionAttributes.count}: ${constants.START_QUESTION}${question}`;
+  return handlerInput.responseBuilder
+    .speak(RESPONSE_MSG)
+    .reprompt(RESPONSE_MSG)
+    .getResponse();
 }
 
 function finalScore(handlerInput) {

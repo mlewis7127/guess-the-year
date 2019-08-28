@@ -1,0 +1,15 @@
+pipeline:
+  prepare:
+    image: node:8.11.0-alpine
+    commands:
+      - npm install
+  lint:
+    image: node:8.11.0-alpine
+    commands:
+      - npm run lint
+  npm audit:
+    image: node:8.11.0-alpine
+    commands:
+      - npm install -g npm@6.9.0
+      - npm audit
+

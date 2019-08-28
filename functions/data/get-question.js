@@ -26,9 +26,9 @@ const { TABLE_NAME } = process.env;
 const getNextQuestion = async (id) => {
   console.log(`In getNextQuestion function with ID: ${id}`);
   const resp = await dynamodb.get({
-      TableName: TABLE_NAME,
-      Key: { 'Id': id}
-    }).promise();
+    TableName: TABLE_NAME,
+    Key: { Id: id },
+  }).promise();
 
   return resp;
 };
