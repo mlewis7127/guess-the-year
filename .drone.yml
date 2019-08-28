@@ -13,3 +13,9 @@ pipeline:
       - npm install -g npm@6.9.0
       - npm audit
 
+ deploy to integration:
+    image: jch254/docker-node-serverless
+    commands:
+      - serverless deploy --stage dev
+    when:
+      event: tag
